@@ -5,6 +5,24 @@ All notable changes to the CosyVoice Web Demo project will be documented in this
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2025-07-01
+
+### Changed
+- **Audio Controls**: Replaced custom audio controls with native browser controls
+- **User Interface**: Simplified audio playback interface for better user experience
+- **Accessibility**: Improved accessibility by using native HTML5 audio controls
+
+### Removed
+- Custom play/pause, stop, rewind, and replay buttons
+- Custom progress bar and time display
+- ~100 lines of custom audio control JavaScript code
+- Associated CSS styling for custom controls
+
+### Fixed
+- Enhanced cross-browser compatibility with native audio controls
+- Improved accessibility for screen readers and assistive technologies
+- Reduced code complexity and maintenance overhead
+
 ## [0.1.0] - 2025-07-01
 
 ### Added

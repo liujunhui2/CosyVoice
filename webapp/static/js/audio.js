@@ -19,65 +19,22 @@ class AudioController {
         // Wait for DOM to be ready
         document.addEventListener('DOMContentLoaded', () => {
             this.generatedPlayer = document.getElementById('generated-player');
-            this.bindAudioControls();
+            this.bindAudioEvents();
         });
     }
     
-    bindAudioControls() {
-        // Play/Pause button
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        if (playPauseBtn) {
-            playPauseBtn.addEventListener('click', () => {
-                this.togglePlayPause();
-            });
-        }
-        
-        // Stop button
-        const stopBtn = document.getElementById('stop-btn');
-        if (stopBtn) {
-            stopBtn.addEventListener('click', () => {
-                this.stopAudio();
-            });
-        }
-        
-        // Rewind button
-        const rewindBtn = document.getElementById('rewind-btn');
-        if (rewindBtn) {
-            rewindBtn.addEventListener('click', () => {
-                this.rewindAudio();
-            });
-        }
-        
-        // Replay button
-        const replayBtn = document.getElementById('replay-btn');
-        if (replayBtn) {
-            replayBtn.addEventListener('click', () => {
-                this.replayAudio();
-            });
-        }
-        
-        // Progress bar click
-        const progressBar = document.querySelector('.progress-bar');
-        if (progressBar) {
-            progressBar.addEventListener('click', (e) => {
-                this.seekAudio(e);
-            });
-        }
-        
-        // Audio player events
+    bindAudioEvents() {
+        // Audio player events for logging and monitoring
         if (this.generatedPlayer) {
             this.generatedPlayer.addEventListener('play', () => {
-                this.updatePlayPauseButton(true);
                 audioLogger.info('Play started');
             });
             
             this.generatedPlayer.addEventListener('pause', () => {
-                this.updatePlayPauseButton(false);
                 audioLogger.info('Playback paused');
             });
             
             this.generatedPlayer.addEventListener('ended', () => {
-                this.updatePlayPauseButton(false);
                 audioLogger.info('Playback completed');
             });
             
@@ -92,70 +49,10 @@ class AudioController {
             this.generatedPlayer.addEventListener('canplay', () => {
                 audioLogger.info('Audio ready to play');
             });
-        }
-    }
-    
-    togglePlayPause() {
-        if (!this.generatedPlayer) return;
-        
-        if (this.generatedPlayer.paused) {
-            this.generatedPlayer.play().catch(error => {
-                console.error('Error playing audio:', error);
-                audioLogger.error('Failed to play audio', error.message);
+            
+            this.generatedPlayer.addEventListener('loadedmetadata', () => {
+                audioLogger.info('Audio metadata loaded', `Duration: ${Math.floor(this.generatedPlayer.duration)}s`);
             });
-        } else {
-            this.generatedPlayer.pause();
-        }
-    }
-    
-    stopAudio() {
-        if (!this.generatedPlayer) return;
-        
-        this.generatedPlayer.pause();
-        this.generatedPlayer.currentTime = 0;
-        this.updatePlayPauseButton(false);
-        audioLogger.info('Audio stopped');
-    }
-    
-    rewindAudio() {
-        if (!this.generatedPlayer) return;
-        
-        // Rewind by 10 seconds or to beginning
-        const newTime = Math.max(0, this.generatedPlayer.currentTime - 10);
-        this.generatedPlayer.currentTime = newTime;
-        audioLogger.info('Rewound 10 seconds', `to ${Math.floor(newTime)}s`);
-    }
-    
-    replayAudio() {
-        if (!this.generatedPlayer) return;
-        
-        this.generatedPlayer.currentTime = 0;
-        this.generatedPlayer.play().catch(error => {
-            console.error('Error replaying audio:', error);
-            audioLogger.error('Failed to replay audio', error.message);
-        });
-        audioLogger.info('Audio replay started');
-    }
-    
-    seekAudio(event) {
-        if (!this.generatedPlayer || !this.generatedPlayer.duration) return;
-        
-        const progressBar = event.currentTarget;
-        const rect = progressBar.getBoundingClientRect();
-        const clickX = event.clientX - rect.left;
-        const percentage = clickX / rect.width;
-        
-        this.generatedPlayer.currentTime = percentage * this.generatedPlayer.duration;
-    }
-    
-    updatePlayPauseButton(isPlaying) {
-        const playPauseBtn = document.getElementById('play-pause-btn');
-        if (!playPauseBtn) return;
-        
-        if (isPlaying) {
-            playPauseBtn.innerHTML = '⏸️ Pause';
-        } else {
-            playPauseBtn.innerHTML = '▶️ Play';
         }
     }
 }
