@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Cloning Demo</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎤</text></svg>">
+    <link rel="mask-icon" href="/static/favicon.svg" color="#667eea">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎤 Voice Cloning Demo</h1>
+            <p>Generate speech with voice cloning using reference audio</p>
+        </header>
+
+        <main>
+            <!-- Section 1: Reference Audio Selection -->
+            <section class="reference-section">
+                <h2>📁 Reference Audio Selection</h2>
+                
+                <div class="form-group">
+                    <label for="reference-select">Choose Reference Audio:</label>
+                    <select id="reference-select" class="form-control">
+                        <option value="">Loading reference audios...</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="transcript-display">Reference Audio Transcript:</label>
+                    <textarea id="transcript-display" class="form-control" readonly 
+                              placeholder="Select a reference audio to see its transcript"></textarea>
+                </div>
+
+                <div class="reference-audio-player">
+                    <label>Reference Audio Preview:</label>
+                    <div class="audio-preview-container" id="reference-audio-container" style="display: none;">
+                        <audio id="reference-player" controls preload="metadata">
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="reference-audio-info">
+                            <small>🎵 Listen to the reference voice before generating</small>
+                        </div>
+                    </div>
+                    <div class="no-audio-message" id="no-reference-message">
+                        <small>👆 Select a reference audio above to preview</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 2: Text Input and Voice Generation -->
+            <section class="generation-section">
+                <h2>✍️ Text Input & Voice Generation</h2>
+                
+                <div class="form-group">
+                    <label for="text-input">Enter text to generate speech:</label>
+                    <textarea id="text-input" class="form-control" rows="4" 
+                              placeholder="Type the text you want to convert to speech using the selected reference voice...">作为北京特色的中式府邸，郡王府既有皇家园林的气派，又兼得东方古典意韵，同时具备时尚现代的气息，是独具特色的"东方美学体验中心"。近年来，北京郡王府致力于打造"朝阳区国际化城市会客厅"，中式美学、潮酷国风、现代科技等多元风格在此交汇，为大家也带来了不同体验。
+
+来郡王府一定要品味一下「四面荷风」的下午茶～
+
+「四面荷风」位于郡王府后花园，是有名的网红打卡点。四面荷风下午茶以四季变换推出应季茶点，精致美观、芳香清甜。在这里听雅乐、品茗茶，古风写意间，沉浸感十足。
+
+也可以来一旁的「喜岸咖啡」闲坐，看云卷云舒，感受冬日氛围，捧一杯咖啡，凝视时光的流逝。</textarea>
+                </div>
+
+                <div class="controls">
+                    <button id="generate-btn" class="btn btn-primary" disabled>
+                        🎵 Generate Voice
+                    </button>
+                    <div class="loading-spinner" id="loading-spinner" style="display: none;">
+                        <div class="spinner"></div>
+                        <span>Generating audio...</span>
+                    </div>
+                </div>
+
+                <!-- Generated Audio Player -->
+                <div class="generated-audio-section" id="generated-audio-section" style="display: none;">
+                    <h3>🔊 Generated Audio</h3>
+                    <div class="audio-player-container">
+                        <audio id="generated-player" controls>
+                            Your browser does not support the audio element.
+                        </audio>
+                        <div class="audio-controls">
+                            <button id="play-pause-btn" class="btn btn-secondary">▶️ Play</button>
+                            <button id="stop-btn" class="btn btn-secondary">⏹️ Stop</button>
+                            <button id="rewind-btn" class="btn btn-secondary">⏪ Rewind</button>
+                            <button id="replay-btn" class="btn btn-secondary">🔄 Replay</button>
+                        </div>
+                        <div class="audio-progress">
+                            <div class="progress-bar">
+                                <div id="progress-fill" class="progress-fill"></div>
+                            </div>
+                            <div class="time-display">
+                                <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Log Section -->
+        <section class="log-section">
+            <div class="log-header">
+                <h3>📋 System Log</h3>
+                <div class="log-controls">
+                    <button id="clear-log-btn" class="btn btn-small">🗑️ Clear</button>
+                    <button id="toggle-log-btn" class="btn btn-small">📖 Show/Hide</button>
+                    <button id="test-log-btn" class="btn btn-small">🧪 Test Log</button>
+                    <button id="test-audio-btn" class="btn btn-small">🔊 Test Audio</button>
+                </div>
+            </div>
+            <div class="log-container" id="log-container">
+                <div class="log-content" id="log-content">
+                    <!-- Log entries will be added here dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Advanced Text-to-Speech with Voice Cloning</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/logger.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/audio.js"></script>
+</body>
+</html>
