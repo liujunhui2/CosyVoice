@@ -20,13 +20,29 @@
             <p>Generate speech with voice cloning using reference audio</p>
         </header>
 
+        <!-- Mode Toggle -->
+        <div class="mode-toggle-container">
+            <div class="mode-toggle">
+                <button id="reference-mode-btn" class="mode-btn active">📁 Reference Mode</button>
+                <button id="recording-mode-btn" class="mode-btn">🎙️ Recording Mode</button>
+            </div>
+        </div>
+
         <main>
             <!-- Section 1: Reference Audio Selection -->
-            <section class="reference-section">
+            <section class="reference-section" id="reference-section">
                 <h2>📁 Reference Audio Selection</h2>
                 
+                <!-- Reference Type Toggle -->
+                <div class="reference-toggle-container">
+                    <div class="reference-toggle">
+                        <button id="preset-audio-btn" class="reference-type-btn active">🎵 Preset Audio</button>
+                        <button id="user-recordings-btn" class="reference-type-btn">👤 Your Recordings</button>
+                    </div>
+                </div>
+                
                 <div class="form-group">
-                    <label for="reference-select">Choose Reference Audio:</label>
+                    <label for="reference-select" id="reference-select-label">Choose Reference Audio:</label>
                     <select id="reference-select" class="form-control">
                         <option value="">Loading reference audios...</option>
                     </select>
@@ -54,9 +70,124 @@
                 </div>
             </section>
 
+            <!-- Recording Section (Hidden by default) -->
+            <section class="recording-section" id="recording-section" style="display: none;">
+                <h2>🎙️ Voice Recording Upload</h2>
+                
+                <!-- Recording Instructions -->
+                <div class="recording-instructions">
+                    <div class="alert alert-info">
+                        <strong>📝 录音提示：</strong>为达到最佳效果，请在安静的环境录制音频，并按照提示调整语音。录音时长请控制在30秒以内。
+                    </div>
+                    <div class="alert alert-warning">
+                        <strong>ℹ️ 说明：</strong>录音模式仅用于上传录音、标签和对应文本。完成录音后，请切换到参考模式进行语音生成。
+                    </div>
+                </div>
+
+                <!-- User Information -->
+                <div class="form-group">
+                    <label for="user-id-input">User ID:</label>
+                    <input type="text" id="user-id-input" class="form-control" 
+                           placeholder="Enter your user ID (e.g., user123)" required>
+                    <small class="form-text text-muted">录音文件将保存为: <span id="filename-hint">请输入用户ID和选择标签</span></small>
+                </div>
+
+                <!-- Voice Tag Selection -->
+                <div class="form-group">
+                    <label for="voice-tag-select">Voice Tag:</label>
+                    <select id="voice-tag-select" class="form-control">
+                        <option value="">Select voice tag...</option>
+                        <option value="Normal">Normal - 正常语速的日常语音</option>
+                        <option value="Strong">Strong - 朗诵或者强调，慢语速</option>
+                        <option value="Soft">Soft - 轻柔的声音</option>
+                    </select>
+                </div>
+
+                <!-- Recording Text -->
+                <div class="form-group">
+                    <label for="recording-text">Recording Text:</label>
+                    <textarea id="recording-text" class="form-control" rows="6" 
+                              placeholder="Select a voice tag to see the recommended text..."></textarea>
+                    <small class="form-text text-muted">
+                        <span id="recording-hint">Select a voice tag above to see the recording hint.</span>
+                    </small>
+                </div>
+
+                <!-- Recording Controls -->
+                <div class="recording-controls">
+                    <button id="start-recording-btn" class="btn btn-danger" disabled>
+                        🔴 Start Recording
+                    </button>
+                    <button id="stop-recording-btn" class="btn btn-secondary" disabled>
+                        ⏹️ Stop Recording
+                    </button>
+                    <button id="play-recording-btn" class="btn btn-info" disabled>
+                        ▶️ Play Recording
+                    </button>
+                    <div class="recording-status" id="recording-status"></div>
+                </div>
+
+                <!-- Recording Audio Player -->
+                <div class="recorded-audio-section" id="recorded-audio-section" style="display: none;">
+                    <h3>🎵 Your Recording</h3>
+                    <audio id="recorded-player" controls>
+                        Your browser does not support the audio element.
+                    </audio>
+                </div>
+
+                <!-- Transcription Section -->
+                <div class="transcription-section" id="transcription-section" style="display: none;">
+                    <h3>📝 Transcription</h3>
+                    <div class="transcription-controls">
+                        <button id="transcribe-btn" class="btn btn-primary">
+                            🎯 Transcribe Audio
+                        </button>
+                        <div class="loading-spinner" id="transcribe-loading" style="display: none;">
+                            <div class="spinner"></div>
+                            <span>Transcribing audio...</span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" id="transcription-result" style="display: none;">
+                        <label for="transcribed-text">Transcribed Text:</label>
+                        <textarea id="transcribed-text" class="form-control" rows="4" readonly></textarea>
+                        <button id="use-transcription-btn" class="btn btn-secondary btn-sm mt-2">
+                            📋 Use Transcribed Text
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Submit Recording -->
+                <div class="submit-recording-section" id="submit-recording-section" style="display: none;">
+                    <button id="submit-recording-btn" class="btn btn-secondary" disabled>
+                        💾 Commit Recording
+                    </button>
+                    <p class="mt-2 text-muted">
+                        <small>录音将保存为 <strong id="filename-preview"></strong> 和 <strong id="textfile-preview"></strong></small>
+                    </p>
+                </div>
+            </section>
+
             <!-- Section 2: Text Input and Voice Generation -->
-            <section class="generation-section">
+            <section class="generation-section" id="generation-section">
                 <h2>✍️ Text Input & Voice Generation</h2>
+                
+                <!-- Reference Mode Instructions -->
+                <div class="mode-instructions" id="reference-mode-instructions">
+                    <div class="alert alert-info">
+                        <strong>📁 Reference Mode:</strong> Select a reference audio (preset or your uploaded recordings) and enter text to generate speech with that voice.
+                    </div>
+                </div>
+
+                <!-- Recording Mode Instructions (Hidden in recording mode) -->
+                <div class="mode-instructions" id="recording-mode-instructions" style="display: none;">
+                    <div class="alert alert-warning">
+                        <strong>🎙️ Recording Mode:</strong> Voice generation is disabled in recording mode. Please switch to Reference Mode to generate speech using your uploaded recordings.
+                    </div>
+                </div>
+
+                <!-- Voice Generation Content (Hidden in recording mode) -->
+                <div id="voice-generation-content">
                 
                 <div class="form-group">
                     <label for="text-input">Enter text to generate speech:</label>
@@ -89,6 +220,7 @@
                         </audio>
                     </div>
                 </div>
+                </div> <!-- End voice-generation-content -->
             </section>
         </main>
 
@@ -116,6 +248,7 @@
     </div>
 
     <script src="/static/js/logger.js"></script>
+    <script src="/static/js/recording.js"></script>
     <script src="/static/js/app.js"></script>
     <script src="/static/js/audio.js"></script>
 </body>

@@ -95,6 +95,11 @@ class CosyVoiceApp {
     }
     
     async onReferenceAudioChange(audioId) {
+        // Skip processing if we're currently loading references
+        if (window.voiceRecorder && window.voiceRecorder.isLoadingReferences) {
+            return;
+        }
+        
         this.selectedReferenceId = audioId;
         
         if (!audioId) {
@@ -106,6 +111,17 @@ class CosyVoiceApp {
             return;
         }
         
+        // Check if this is a user recording
+        if (audioId.startsWith('user_recording:')) {
+            await this.handleUserRecordingSelection(audioId);
+            return;
+        }
+        
+        // Handle preset audio selection
+        await this.handlePresetAudioSelection(audioId);
+    }
+    
+    async handlePresetAudioSelection(audioId) {
         // Find selected audio
         const selectedAudio = this.referenceAudios.find(audio => audio.id === audioId);
         if (!selectedAudio) {
@@ -113,7 +129,7 @@ class CosyVoiceApp {
             return;
         }
         
-        safeLogger.info(`Selected reference audio: ${selectedAudio.name}`);
+        safeLogger.info(`Selected preset audio: ${selectedAudio.name}`);
         
         // Update transcript
         this.transcriptDisplay.value = selectedAudio.transcript;
@@ -130,39 +146,104 @@ class CosyVoiceApp {
             // Add loading state
             this.referencePlayer.addEventListener('loadstart', () => {
                 safeLogger.info('Loading reference audio preview...');
-            });
+            }, { once: true });
             
             this.referencePlayer.addEventListener('canplay', () => {
-                safeLogger.success('Reference audio preview ready to play');
-            });
+                safeLogger.success('Reference audio loaded successfully');
+            }, { once: true });
             
             this.referencePlayer.addEventListener('error', (e) => {
-                console.error('Error loading reference audio:', e);
-                safeLogger.error('Failed to load reference audio preview');
-                this.referenceContainer.style.display = 'none';
-                this.noReferenceMessage.style.display = 'block';
-            });
+                safeLogger.error('Failed to load reference audio', e);
+            }, { once: true });
             
         } catch (error) {
-            console.error('Error setting up reference audio:', error);
-            safeLogger.error('Failed to setup reference audio preview', error.message);
+            safeLogger.error('Error setting up reference audio player', error);
+        }
+        
+        this.validateForm();
+    }
+    
+    async handleUserRecordingSelection(audioId) {
+        const recordingId = audioId.replace('user_recording:', '');
+        
+        try {
+            // Get the selected option to access the transcript
+            const selectedOption = this.referenceSelect.querySelector(`option[value="${audioId}"]`);
+            const transcript = selectedOption ? selectedOption.dataset.transcript : '';
+            
+            safeLogger.info(`Selected user recording: ${recordingId}`);
+            
+            // Update transcript
+            this.transcriptDisplay.value = transcript;
+            
+            // Show loading state
+            this.noReferenceMessage.style.display = 'none';
+            this.referenceContainer.style.display = 'block';
+            
+            // Update reference audio player
+            const audioUrl = `/api/user-recording/${recordingId}`;
+            this.referencePlayer.src = audioUrl;
+            
+            // Add loading state
+            this.referencePlayer.addEventListener('loadstart', () => {
+                safeLogger.info('Loading user recording preview...');
+            }, { once: true });
+            
+            this.referencePlayer.addEventListener('canplay', () => {
+                safeLogger.success('User recording loaded successfully');
+            }, { once: true });
+            
+            this.referencePlayer.addEventListener('error', (e) => {
+                safeLogger.error('Failed to load user recording', e);
+            }, { once: true });
+            
+        } catch (error) {
+            safeLogger.error('Error loading user recording', error);
         }
         
         this.validateForm();
     }
     
     validateForm() {
-        const hasReference = !!this.selectedReferenceId;
         const hasText = this.textInput.value.trim().length > 0;
+        let hasValidReference = false;
         
-        this.generateBtn.disabled = !hasReference || !hasText || this.isGenerating;
+        // Check current mode
+        if (window.voiceRecorder && window.voiceRecorder.currentMode === 'recording') {
+            // Recording mode: voice generation is disabled
+            hasValidReference = false;
+        } else {
+            // Reference mode: check the unified reference select
+            const referenceSelect = document.getElementById('reference-select');
+            hasValidReference = referenceSelect && referenceSelect.value;
+        }
+        
+        this.generateBtn.disabled = !hasValidReference || !hasText || this.isGenerating;
     }
     
     async generateVoice() {
         if (this.isGenerating) return;
         
         const text = this.textInput.value.trim();
-        if (!text || !this.selectedReferenceId) {
+        let referenceId = null;
+        let isUserRecording = false;
+        
+        // Determine reference source
+        if (window.voiceRecorder && window.voiceRecorder.currentMode === 'recording') {
+            // Recording mode: voice generation is disabled
+            safeLogger.error('Voice generation is disabled in recording mode. Please switch to Reference Mode.');
+            return;
+        } else {
+            // Reference mode: check the unified reference select
+            const referenceSelect = document.getElementById('reference-select');
+            
+            if (referenceSelect && referenceSelect.value) {
+                referenceId = referenceSelect.value;
+                isUserRecording = referenceId.startsWith('user_recording:');
+            }
+        }
+        
+        if (!text || !referenceId) {
             safeLogger.error('Please select a reference audio and enter text.');
             return;
         }
@@ -171,16 +252,25 @@ class CosyVoiceApp {
         this.generateBtn.disabled = true;
         this.loadingSpinner.style.display = 'flex';
         
-        safeLogger.info('Starting voice generation...', {
+        safeLogger.info(`Starting voice generation using ${isUserRecording ? 'user recording' : 'preset reference'}...`, {
             textLength: text.length,
-            referenceId: this.selectedReferenceId
+            referenceId: referenceId
         });
         
         try {
             // Prepare form data
             const formData = new FormData();
             formData.append('text', text);
-            formData.append('reference_audio_id', this.selectedReferenceId);
+            
+            if (isUserRecording) {
+                // Extract the actual recording ID from user_recording:id format
+                const actualRecordingId = referenceId.replace('user_recording:', '');
+                formData.append('reference_audio_id', actualRecordingId);
+                formData.append('mode', 'user_recording');
+            } else {
+                formData.append('reference_audio_id', referenceId);
+                formData.append('mode', 'reference');
+            }
             
             safeLogger.debug('Sending API request to /api/generate-voice');
             

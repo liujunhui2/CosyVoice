@@ -2,7 +2,7 @@
 Version information for CosyVoice Web Demo
 """
 
-__version__ = "0.1.1"
+__version__ = "0.3.0"
 __title__ = "CosyVoice Web Demo"
 __description__ = "Web-based voice cloning application using CosyVoice"
 __author__ = "CosyVoice Team"
@@ -10,6 +10,22 @@ __license__ = "MIT"
 
 # Version history
 VERSION_HISTORY = {
+    "0.3.0": {
+        "date": "2025-07-02",
+        "features": [
+            "Simplified commit button logic - always visible and functional",
+            "Removed complex frontend duration validation",
+            "Streamlined recording workflow",
+            "Enhanced user experience with consistent button behavior"
+        ],
+        "fixes": [
+            "Fixed 'Recording too long (Infinitys)' error message bug",
+            "Removed unreliable WebM duration detection from frontend",
+            "Simplified JavaScript codebase by removing ~200 lines of duration handling",
+            "Eliminated confusing button state changes during recording",
+            "Improved recording UI consistency and reliability"
+        ]
+    },
     "0.1.1": {
         "date": "2025-07-01",
         "features": [
