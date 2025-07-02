@@ -622,3 +622,31 @@ curl -X POST /api/generate-voice -F "reference_audio_id=user1_Strong"
 6. ✨ **Success** → High-quality voice cloning output
 
 **No more errors, clean interface, full functionality! 🎊**
+## Version 0.3.0 Release - 2025-07-02 ✅
+
+### Major Changes in v0.3.0:
+- **Simplified Commit Button Logic**: Removed complex frontend duration validation
+- **Fixed "Infinitys" Bug**: Eliminated unreliable WebM duration detection  
+- **Code Simplification**: Removed ~200 lines of problematic duration handling JavaScript
+- **Enhanced UX**: Consistent button behavior, always visible commit button
+- **Streamlined Workflow**: Recording process is now more intuitive and reliable
+
+### Technical Improvements:
+- Removed frontend duration checking that was causing "Recording too long (Infinitys)" errors
+- Simplified recording.js by eliminating complex duration validation logic
+- Enhanced user experience with consistent commit button behavior
+- Prepared for future backend-based duration validation
+
+### Files Updated:
+- `webapp/static/js/recording.js` - Major simplification
+- `webapp/static/index.html` - Removed duration limit text
+- `webapp/version.py` - Updated to v0.3.0
+- `CHANGELOG.md` - Added comprehensive version history
+
+### Git Status:
+- ✅ Committed to main branch
+- ✅ Tagged as v0.3.0  
+- ✅ Pushed to GitHub repository
+- ✅ All changes documented
+
+---
